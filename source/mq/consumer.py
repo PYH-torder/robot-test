@@ -1,3 +1,4 @@
+import sys
 import pika
 import json
 import config
@@ -33,10 +34,12 @@ def callback(ch, method, properties, body):
             #order set
             if(data["ty"] == "order"):
                 setdb.setOrder(data["storeid"], data["ssid"], data["otype"], data["ocode"], data["omenu"], data["oname"], data["oqty"], data["otable"])
+            
+            sys.stdout.flush()
 
     ch.basic_ack(delivery_tag=method.delivery_tag)
 
 channel.queue_declare(queue=config.serverid)
 channel.basic_consume(config.serverid, callback)
-print(' [*] Waiting for messages. To exit press CTRL+C')
+print(' [*] Waiting for messages. To exit press CTRL+C', flush=True)
 channel.start_consuming()

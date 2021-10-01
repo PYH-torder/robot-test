@@ -13,5 +13,5 @@ while True:
         "ip" : config.ipin
     })
 
-    print(time.strftime('%Y-%m-%d %H:%M:%S'), 'sleep')
+    print(time.strftime('%Y-%m-%d %H:%M:%S'), 'sleep', flush=True)
     time.sleep(30)      #30초단위로 현재 상태 전달

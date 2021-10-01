@@ -105,5 +105,5 @@ while True:
         print(time.strftime('%Y-%m-%d %H:%M:%S'), 'success socekt connect')
 
 
-    print(time.strftime('%Y-%m-%d %H:%M:%S'), 'sleep')
+    print(time.strftime('%Y-%m-%d %H:%M:%S'), 'sleep', flush=True)
     time.sleep(1)      #1초단위로 현재 상태 전달
