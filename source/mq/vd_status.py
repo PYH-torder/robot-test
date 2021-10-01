@@ -37,5 +37,5 @@ while True:
                     "robotip" : "0.0.0.0"
                 })
 
-    print(time.strftime('%Y-%m-%d %H:%M:%S'), 'sleep')
+    print(time.strftime('%Y-%m-%d %H:%M:%S'), 'sleep', flush=True)
     time.sleep(3)      #1초단위로 현재 상태 전달
