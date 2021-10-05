@@ -28,5 +28,5 @@ while True:
                 # storeid, ssid, rcode, deviceid, etc, name, status, battery, rtype
                 setdb.setDevice(storeid, config.serverid, "DYCM", device[3], device[2], device[5], rstatus, 100, 3)
 
-    print(time.strftime('%Y-%m-%d %H:%M:%S'), 'sleep')
+    print(time.strftime('%Y-%m-%d %H:%M:%S'), 'sleep', flush=True)
     time.sleep(3)      #1초단위로 현재 상태 전달

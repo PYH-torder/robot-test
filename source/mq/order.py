@@ -265,5 +265,5 @@ while True:
         if(step1 > 0):
             run_time = run_time + 1
 
-    print(time.strftime('%Y-%m-%d %H:%M:%S'), 'sleep')
+    print(time.strftime('%Y-%m-%d %H:%M:%S'), 'sleep', flush=True)
     time.sleep(1)      #1초단위로 실행

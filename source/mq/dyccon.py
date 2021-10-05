@@ -41,7 +41,7 @@ buildTable16(gcrc_16)
 def sendPacket(cmd, data, hport):
     global gseq, host
 
-    gseq = gseq + 1
+    gseq = (gseq + 1) % 256
 
     tmp = b'\x02'   # stx
     tmp += bytes([gseq])   # seq
