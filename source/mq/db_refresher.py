@@ -3,7 +3,7 @@ import time
 import setdb
 
 scheduler = BlockingScheduler()
-SCHEDULED_HOUR = 0
+SCHEDULED_HOUR = 9
 SCHEDULED_MINUTE = 0
 
 def flush_db():
