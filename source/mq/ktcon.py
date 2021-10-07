@@ -9,8 +9,8 @@ from pprint import pprint
 
 HOST = "211.184.190.64:40080"
 API_DEFAULT_PATH = "/rmapis"
-AUTH_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJvcGVuYXBpIn0.kaUFD989K_jzH5FITAqy6uq3035KB23kh27pq2stpuk"
 AUTH_TOKEN_PREFIX = "Bearer "
+AUTH_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJvcGVuYXBpIn0.kaUFD989K_jzH5FITAqy6uq3035KB23kh27pq2stpuk"
 HTTP_HEADERS = {
     "Accept": "application/json",
     "Authorization": AUTH_TOKEN_PREFIX + AUTH_TOKEN
@@ -33,38 +33,69 @@ def api_request(method, url, data = {}) :
         return None
 
 def http_error_handler(res_json) :
-    print("==== ktcon http error ====")
-    print("Response data :", res_json)
+    print("==== ktcon http error ====", file = sys.stderr)
+    print("Response data :", res_json, file = sys.stderr)
     
     try :
-        print("Timestamp :", res_json["timestamp"])
+        print("Timestamp :", res_json["timestamp"], file = sys.stderr)
     except :
-        print("Timestamp :", datetime.datetime.now())
+        print("Timestamp :", datetime.datetime.now(), file = sys.stderr)
     
     try :
-        print("HTTP status :", res_json["status"], res_json["error"])
+        print("HTTP status :", res_json["status"], res_json["error"], file = sys.stderr)
     except :
-        print("HTTP status :", res_json["code"])
+        print("HTTP status :", res_json["code"], file = sys.stderr)
     
     try :
-        print("Error message :", res_json["message"])
+        print("Error message :", res_json["message"], file = sys.stderr)
     except :
-        print("Error message :", res_json["msg"])
+        print("Error message :", res_json["msg"], file = sys.stderr)
 
-    print("==========================", flush = True)
+    print("==========================", flush = True, file = sys.stderr)
 
 def get_robots() :
     url = get_default_api_url() + "/status/" + SITE_ID + "/robots"
     res = api_request("get", url)
     robots = []
     for robot in res["list"]:
-        robots.append(robot)
+        robots.append(convert_robot_status(robot))
     return robots
 
 def get_robot_status(robot_id) : 
     url = get_default_api_url() + "/status/" + SITE_ID + "/robots/" + robot_id
     res = api_request("get", url)
-    return res["data"]
+    
+    return convert_robot_status(res["data"])
+
+def convert_robot_status(robot_obj) :
+    res_obj = {
+        "battery": robot_obj["battery"],
+        "create_time": robot_obj["createTime"],
+        "heading": robot_obj["heading"],
+        "robot_id": robot_obj["robotId"],
+        "x": robot_obj["x"],
+        "y": robot_obj["y"]
+    }
+
+    if robot_obj["driveStatus"] == 0 :
+        res_obj["status"] = "Ready"
+    elif robot_obj["driveStatus"] == 1 or robot_obj["driveStatus"] == 4:
+        res_obj["status"] = "Moving"
+    elif robot_obj["driveStatus"] == 2 :
+        res_obj["status"] = "Moving Complete"
+    elif robot_obj["driveStatus"] == 3 or robot_obj["driveStatus"] == 5 or \
+        robot_obj["driveStatus"] == 6 or robot_obj["driveStatus"] == 7 or \
+        robot_obj["driveStatus"] == 8 or robot_obj["driveStatus"] == 12 :
+        print("ktcon drive status detail - code :", robot_obj["driveStatus"], flush = True)
+        res_obj["status"] = "Stop"
+    elif robot_obj["driveStatus"] == 9 :
+        res_obj["status"] = "Manual mode"
+    elif robot_obj["driveStatus"] == 10 or robot_obj["driveStatus"] == 11 : 
+        res_obj["status"] = "Onboard elevator"
+    else :
+        res_obj["status"] = "Unknown status"
+
+    return res_obj
 
 def get_ready_robot() :
     robots = get_robots()
@@ -139,8 +170,9 @@ def stop_mission(mission_id) :
     return res["data"]
 
 #pprint(json.dumps({}))
+#pprint(get_robots())
 #pprint(get_robot_status('1234567890'))
-pprint(get_nodes())
+#pprint(get_nodes())
 #pprint(get_node_by_id("NO-40311075"))
 #pprint(start_mission("1234567890", "moving", "NO-80529038", "test_item"))
 #pprint(stop_mission('1234567890211006165748147'))
