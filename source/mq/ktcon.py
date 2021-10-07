@@ -15,7 +15,7 @@ HTTP_HEADERS = {
     "Accept": "application/json",
     "Authorization": AUTH_TOKEN_PREFIX + AUTH_TOKEN
 }
-SITE_ID = "656fa13493fc4aafa3c9cdfe3eec8df7"
+SITE_ID = "7ff8541b5dee4e1bb3b1c802723caa56"
 
 def get_default_api_url() :
     return "http://" + HOST + API_DEFAULT_PATH
@@ -79,14 +79,14 @@ def convert_robot_status(robot_obj) :
 
     if robot_obj["driveStatus"] == 0 :
         res_obj["status"] = "Ready"
-    elif robot_obj["driveStatus"] == 1 or robot_obj["driveStatus"] == 4:
+    elif robot_obj["driveStatus"] == 1 or robot_obj["driveStatus"] == 2 or \
+        robot_obj["driveStatus"] == 3 or robot_obj["driveStatus"] == 4 :
         res_obj["status"] = "Moving"
-    elif robot_obj["driveStatus"] == 2 :
-        res_obj["status"] = "Moving Complete"
-    elif robot_obj["driveStatus"] == 3 or robot_obj["driveStatus"] == 5 or \
-        robot_obj["driveStatus"] == 6 or robot_obj["driveStatus"] == 7 or \
-        robot_obj["driveStatus"] == 8 or robot_obj["driveStatus"] == 12 :
-        print("ktcon drive status detail - code :", robot_obj["driveStatus"], flush = True)
+    elif robot_obj["driveStatus"] == 5 or robot_obj["driveStatus"] == 6 or \
+        robot_obj["driveStatus"] == 7 or robot_obj["driveStatus"] == 8 or \
+        robot_obj["driveStatus"] == 12 :
+        print("ktcon drive status detail - robot id :",robot_obj["robot_id"],\
+            ", code :", robot_obj["driveStatus"])
         res_obj["status"] = "Stop"
     elif robot_obj["driveStatus"] == 9 :
         res_obj["status"] = "Manual mode"
