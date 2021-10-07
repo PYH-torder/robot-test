@@ -268,5 +268,4 @@ while True:
             run_time = run_time + 1
 
     print(time.strftime('%Y-%m-%d %H:%M:%S'), 'sleep', flush=True)
-    print(arrStatus)
     time.sleep(1)      #1초단위로 실행
