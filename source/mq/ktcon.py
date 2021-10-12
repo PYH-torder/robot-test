@@ -76,7 +76,7 @@ def convert_robot_status(robot_obj) :
         "x": robot_obj["x"],
         "y": robot_obj["y"]
     }
-
+    print(robot_obj["robotId"], robot_obj["driveStatus"])
     if robot_obj["driveStatus"] == 0 :
         res_obj["status"] = "Ready"
     elif robot_obj["driveStatus"] == 1 or robot_obj["driveStatus"] == 2 or \
