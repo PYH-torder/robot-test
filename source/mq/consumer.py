@@ -3,6 +3,7 @@ import pika
 import json
 import config
 import setdb
+import send_message
 
 connection = pika.BlockingConnection(pika.ConnectionParameters(
     host=config.host
@@ -35,6 +36,9 @@ def callback(ch, method, properties, body):
             if(data["ty"] == "order"):
                 setdb.setOrder(data["storeid"], data["ssid"], data["otype"], data["ocode"], data["omenu"], data["oname"], data["oqty"], data["otable"])
             
+            if(data["ty"] == ""):
+                pass
+
             sys.stdout.flush()
 
     ch.basic_ack(delivery_tag=method.delivery_tag)

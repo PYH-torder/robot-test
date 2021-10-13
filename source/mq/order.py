@@ -7,6 +7,7 @@ import vdcon
 import dyccon
 import lgscon
 import nmrcon
+import send_message
 
 queue2 = "robot_main"
 cut_time = 60 * 5
@@ -123,7 +124,7 @@ while True:
             step2status = getRobotStatus(now_robot_step2)  # LG 서빙로봇
             step3status = getRobotStatus(now_robot_step3)  # 동양 커피머신
 
-            print("\n###########################\nstatus :: ", step1status["status"], "/ ", step2status["status"], "/ ", step3status["status"], " / now_step :: ", now_step, "/ step1 :: ", step1 , " / run_time ", run_time , " / qty :: ", oqty , " / now :: ", now_count)
+            print("\n###########################\nstatus :: ", step1status["status"], "/ ", step2status["status"], "/ ", step3status["status"], " / now_step :: ", now_step, "/ step1 :: ", step1, "/ step2 :: ", step2 , " / run_time ", run_time , " / qty :: ", oqty , " / now :: ", now_count)
 
             if(now_count <= oqty):
 
@@ -154,7 +155,7 @@ while True:
                         #     nmrcon.setvar(10, 610, 10)
 
                         time.sleep(5)
-
+                        
                     ## 3. 컵배출
                     if(step1 == 1 and (arrStatus[3] == "2" or arrStatus[3] == "10" or otype == 1 or (otype == 2 and now_count > 1))):
                         if(ice == 1):
@@ -194,6 +195,7 @@ while True:
                     
                     ## 4. 음료 배치
                     if(step1 == 3 and (arrStatus[3] == "5" or arrStatus[3] == "6")):
+                        print(step2status["stype"], otype, otable, flush=True)
                         if(otype == 2 and step2status["status"] == "Ready" and otable != "" and otable != "local"): # 서빙까지 보낼 경우 
                             if(step2status["stype"] == "LGSR"):
                                 nmrcon.setvar(10, 610, 7)
@@ -201,10 +203,11 @@ while True:
                                 nmrcon.setvar(10, 610, 9)
                             
                             nmrcon.setvar(10, 612, now_count)
+                            setStatus(ocode, 4, step2, step3, step4, 1, 1)
+                            
                         if(otype == 1 or (otable == "" and otable == "local")): # 음료제조만 할 경우 종료
                             nmrcon.setvar(10, 610, 8)
-
-                        setStatus(ocode, 4, step2, step3, step4, 1, 1)
+                            setStatus(ocode, 4, step2, step3, step4, 1, 1)
 
                     ## 5. 음료 제조 완료 or 새 음료 제조
                     if(step1 == 4 and (arrStatus[3] == "7" or arrStatus[3] == "8" or arrStatus[3] == "9")):
@@ -232,6 +235,7 @@ while True:
                         # lgscon.gohome(step2status["id"])
                         # time.sleep(3)
                         print(lgscon.delivery(str(otable), step2status["id"]))
+                        send_message.send(step2status["id"], ""+setdb.getStore()[0][1], str(otable), "OnTheWay")
                     if(step2status["stype"] == "VDCS"):
                         print(vdcon.delivery(str(otable), step2status["appkey"], step2status["id"]))
 
@@ -239,6 +243,7 @@ while True:
                 ## 6. 서빙로봇 도착정보 확인
                 if((step2status["status"] == "Arrive" or run_time >= cut_time) and step2 == 1):
                     setStatus(ocode, 9, 9, step3, step4, 9, 9)
+                    send_message.send(step2status["id"], ""+setdb.getStore()[0][1], str(otable), "Arrived")
                     print("End step2")
                 else:
                     print("Ing step2")
