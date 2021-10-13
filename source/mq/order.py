@@ -7,6 +7,7 @@ import vdcon
 import dyccon
 import lgscon
 import nmrcon
+import send_message
 
 queue2 = "robot_main"
 cut_time = 60 * 5
@@ -234,6 +235,7 @@ while True:
                         # lgscon.gohome(step2status["id"])
                         # time.sleep(3)
                         print(lgscon.delivery(str(otable), step2status["id"]))
+                        send_message.send(step2status["id"], ""+setdb.getStore()[0][1], str(otable), "OnTheWay")
                     if(step2status["stype"] == "VDCS"):
                         print(vdcon.delivery(str(otable), step2status["appkey"], step2status["id"]))
 
@@ -241,6 +243,7 @@ while True:
                 ## 6. 서빙로봇 도착정보 확인
                 if((step2status["status"] == "Arrive" or run_time >= cut_time) and step2 == 1):
                     setStatus(ocode, 9, 9, step3, step4, 9, 9)
+                    send_message.send(step2status["id"], ""+setdb.getStore()[0][1], str(otable), "Arrived")
                     print("End step2")
                 else:
                     print("Ing step2")
