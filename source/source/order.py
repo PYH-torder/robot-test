@@ -263,8 +263,9 @@ while True:
                 dyc_con.order(omenu)
                 set_status(ocode, 1, step2, step3, step4, 1, 1)
 
-            if(step1 == 1 and run_time > 10):
-                dyc_con.order(omenu)
+            if(step1 == 1 and run_time > 40):
+                #dyc_con.order(omenu)
+                print("end step1")
                 set_status(ocode, 9, step2, step3, step4, 9, 9)
 
         if(step1 > 0):
