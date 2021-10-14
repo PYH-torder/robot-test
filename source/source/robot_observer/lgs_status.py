@@ -9,8 +9,6 @@ from mq_util import mq_util
 from dao import store_dao
 from dao import device_dao
 
-queue2 = "robot_main"
-
 # rtn = lgscon.devicelist()
 # print(rtn)
 
@@ -34,7 +32,7 @@ while True:
             if(rstatus != ""):
                 device_dao.save_device(storeid, config.server_id, "LGSR", device[3], device[2], device[5], rstatus["status"], rstatus["battery"], 2)
 
-                mq_util.send(queue2, {
+                mq_util.send(config.mqnm, {
                     "tp" : "lgstatus",
                     "id" : config.server_id,
                     "ip" : config.ipin,

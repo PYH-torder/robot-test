@@ -51,4 +51,7 @@ def callback(ch, method, properties, body):
 channel.queue_declare(queue=config.server_id)
 channel.basic_consume(config.server_id, callback)
 print(' [*] Waiting for messages. To exit press CTRL+C', flush=True)
+channel.queue_bind(exchange=config.mqex,
+                   queue=config.server_id,
+                   routing_key=config.server_id + ".#")
 channel.start_consuming()

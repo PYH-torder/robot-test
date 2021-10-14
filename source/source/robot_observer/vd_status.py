@@ -11,8 +11,6 @@ from mq_util import mq_util
 from dao import store_dao
 from dao import device_dao
 
-queue2 = "robot_main"
-
 while True:
 
     stores = store_dao.find_store()
@@ -32,7 +30,7 @@ while True:
                 #               storeid, ssid,          rcode,      deviceid, etc, name, status, battery, rtype
                 device_dao.save_device(storeid, config.server_id, "VDCS", device[3], device[2], device[5], rstatus["status"], rstatus["battery"], 2)
 
-                mq_util.send(queue2, {
+                mq_util.send(config.mqnm, {
                     "tp" : "vdstatus",
                     "id" : config.server_id,
                     "ip" : config.ipin,

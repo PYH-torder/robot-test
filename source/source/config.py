@@ -12,9 +12,11 @@ port = 8576
 vhost = "/"
 mqid = "robot"
 mqpw = "robot2021!"
+mqex = "TROBOT"
+mqnm = "robot_main"
 
-#sqlite_host = "/robot/db/robot_210504.db"
-sqlite_host = "db/robot_210504.db"
+sqlite_host = "/robot/db/robot_210504.db"
+#sqlite_host = "db/robot_210504.db"
 
 vds_host = "http://3.36.46.213:8890/api"
 

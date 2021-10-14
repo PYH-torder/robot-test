@@ -8,8 +8,6 @@ from robot_controller import dyc_con
 from dao import store_dao
 from dao import device_dao
 
-queue2 = "robot_main"
-
 while True:
 
     stores = store_dao.find_store()

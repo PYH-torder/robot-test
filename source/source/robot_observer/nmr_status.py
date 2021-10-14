@@ -11,8 +11,6 @@ from mq_util import mq_util
 from dao import store_dao
 from dao import device_dao
 
-queue2 = "robot_main"
-
 robot_ip = config.nmr_ip  # Robot (Indy) IP
 robot_name = config.nmr_name  # Robot name (Indy7)
 
@@ -88,7 +86,7 @@ while True:
 
             device_dao.save_device(storeid, config.server_id, "NMRA", robot_name, val4 + "|" + str(val1) + "|" + str(val2) + "|" + str(val3), robot_name, indy_send_status, 100, 1)
 
-            mq_util.send(queue2, {
+            mq_util.send(config.mqnm, {
                 "tp" : "nmrstatus",
                 "id" : config.server_id,
                 "ip" : config.ipin,

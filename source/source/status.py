@@ -2,11 +2,9 @@ import time
 import config
 from mq_util import mq_util
 
-queue2 = "robot_main"
-
 while True:
 
-    mq_util.send(queue2, {
+    mq_util.send(config.mqnm, {
         "tp" : "status",
         "id" : config.server_id,
         "ip" : config.ipin

@@ -9,7 +9,6 @@ from robot_controller import lgs_con
 from robot_controller import nmr_con
 from util import http_util
 
-queue2 = "robot_main"
 cut_time = 60 * 5
 now_ordercode = ""
 now_count = 0
@@ -54,7 +53,7 @@ def get_robot_status(deviceid):
 
 def set_status(ocode, step1, step2, step3, step4, status, now_count):
     order_dao.save_change_order(ocode, step1, step2, step3, step4, status, now_count)
-    mq_util.send(queue2, {
+    mq_util.send(config.mqnm, {
         "tp" : "orderstatus",
         "id" : config.server_id,
         "ocode" : ocode,
@@ -69,6 +68,8 @@ def set_status(ocode, step1, step2, step3, step4, status, now_count):
 while True:
 
     rows = order_dao.find_one_order()
+    prev_seq = -1
+    mq_flag = [False, False, False, False, False, False, False, False]
 
     for row in rows:
 
@@ -87,6 +88,11 @@ while True:
         ice = 0
         ade = 0
         camera = 0
+        
+        if prev_seq != seq:
+            prev_seq = seq
+            for flag in mq_flag:
+                flag = False
 
         if(omenu == "9"):
             omenu = "coffeeice"
@@ -143,6 +149,16 @@ while True:
                         now_count = now_count + 1
                         step1 = 1
                         nmr_con.set_var(10, 610, 1)
+                        if not mq_flag[0]:
+                            mq_util.send(config.server_id, {
+                                "orderSeq": seq,
+                                "tableNo": otable,
+                                "menu": omenu,
+                                "robotType": step1status["stype"],
+                                "robotId": step1status["id"],
+                                "status": "prepare_operation"
+                            })
+                            mq_flag[0] = True
 
                     ## 2. 홈위치 확인 및 비전카메라 위치 확인
                     if(step1 == 1 and arrStatus[3] == "1" and otype == 2 and now_count == 1):
@@ -154,6 +170,16 @@ while True:
                         # elif(step2status["stype"] == "VDCS"):
                         #     nmrcon.set_var(10, 610, 10)
 
+                        if not mq_flag[1]:
+                            mq_util.send(config.server_id, {
+                                "orderSeq": seq,
+                                "tableNo": otable,
+                                "menu": omenu,
+                                "robotType": step2status["stype"],
+                                "robotId": step2status["id"],
+                                "status": "prepare_delivery_robot"
+                            })
+                            mq_flag[1] = True
                         time.sleep(5)
                         
                     ## 3. 컵배출
@@ -172,6 +198,16 @@ while True:
                             nmr_con.set_var(10, 610, 4)
 
                         set_status(ocode, 2, step2, step3, step4, 1, 1)
+                        if not mq_flag[2]:
+                            mq_util.send(config.server_id, {
+                                "orderSeq": seq,
+                                "tableNo": otable,
+                                "menu": omenu,
+                                "robotType": step3status["stype"],
+                                "robotId": step3status["id"],
+                                "status": "dispense_cup"
+                            })
+                            mq_flag[2] = True
 
                     ## 4. 음료제조
                     if(step1 == 2 and (arrStatus[3] == "3" or arrStatus[3] == "4")):
@@ -192,6 +228,16 @@ while True:
                         print("step3 :: ", omenu)
                         dyc_con.order(omenu)
                         set_status(ocode, 3, step2, step3, step4, 1, 1)
+                        if not mq_flag[3]:
+                            mq_util.send(config.server_id, {
+                                "orderSeq": seq,
+                                "tableNo": otable,
+                                "menu": omenu,
+                                "robotType": step3status["stype"],
+                                "robotId": step3status["id"],
+                                "status": "make_menu"
+                            })
+                            mq_flag[3] = True
                     
                     ## 4. 음료 배치
                     if(step1 == 3 and (arrStatus[3] == "5" or arrStatus[3] == "6")):
@@ -204,10 +250,30 @@ while True:
                             
                             nmr_con.set_var(10, 612, now_count)
                             set_status(ocode, 4, step2, step3, step4, 1, 1)
+                            if not mq_flag[4]:
+                                mq_util.send(config.server_id, {
+                                    "orderSeq": seq,
+                                    "tableNo": otable,
+                                    "menu": omenu,
+                                    "robotType": step1status["stype"],
+                                    "robotId": step1status["id"],
+                                    "status": "deliver_to_delivery_robot"
+                                })
+                                mq_flag[4] = True
                             
                         if(otype == 1 or (otable == "" and otable == "local")): # 음료제조만 할 경우 종료
                             nmr_con.set_var(10, 610, 8)
                             set_status(ocode, 4, step2, step3, step4, 1, 1)
+                            if not mq_flag[4]:
+                                mq_util.send(config.server_id, {
+                                    "orderSeq": seq,
+                                    "tableNo": otable,
+                                    "menu": omenu,
+                                    "robotType": step1status["stype"],
+                                    "robotId": step1status["id"],
+                                    "status": "place_a_cup"
+                                })
+                                mq_flag[4] = True
 
                     ## 5. 음료 제조 완료 or 새 음료 제조
                     if(step1 == 4 and (arrStatus[3] == "7" or arrStatus[3] == "8" or arrStatus[3] == "9")):
@@ -216,15 +282,45 @@ while True:
                         if(now_count >= oqty):
                             if(arrStatus[3] == "8"):
                                 set_status(ocode, 9, step2, step3, step4, 9, 9)
+                                if not mq_flag[5]:
+                                    mq_util.send(config.server_id, {
+                                        "orderSeq": seq,
+                                        "tableNo": otable,
+                                        "menu": omenu,
+                                        "robotType": step3status["stype"],
+                                        "robotId": step3status["id"],
+                                        "status": "operation_complete"
+                                    })
+                                    mq_flag[5] = True
                             else:
                                 set_status(ocode, 9, step2, step3, step4, 1, 1)
                                 now_step = now_step + 1
+                                if not mq_flag[5]:
+                                    mq_util.send(config.server_id, {
+                                        "orderSeq": seq,
+                                        "tableNo": otable,
+                                        "menu": omenu,
+                                        "robotType": step2status["stype"],
+                                        "robotId": step2status["id"],
+                                        "status": "start_delivery"
+                                    })
+                                    mq_flag[5] = True
                             
                             time.sleep(5)
                             nmr_con.stop(10)
                         else:
                             set_status(ocode, 0, step2, step3, step4, 1, 1)
-
+                            if not mq_flag[5]:
+                                mq_util.send(config.server_id, {
+                                    "orderSeq": seq,
+                                    "tableNo": otable,
+                                    "menu": omenu,
+                                    "robotType": step3status["stype"],
+                                    "robotId": step3status["id"],
+                                    "status": "make_next_menu"
+                                })
+                                for flag in mq_flag:
+                                    flag = False
                             time.sleep(5)
 
             ########### 서빙 ###########
@@ -240,10 +336,30 @@ while True:
                         print(vd_con.delivery(str(otable), step2status["appkey"], step2status["id"]))
 
                     set_status(ocode, 9, 1, step3, step4, 1, 1)
+                    if not mq_flag[6]:
+                        mq_util.send(config.server_id, {
+                            "orderSeq": seq,
+                            "tableNo": otable,
+                            "menu": omenu,
+                            "robotType": step2status["stype"],
+                            "robotId": step2status["id"],
+                            "status": "commence_delivery"
+                        })
+                        mq_flag[6] = True
                 ## 6. 서빙로봇 도착정보 확인
                 if((step2status["status"] == "Arrive" or run_time >= cut_time) and step2 == 1):
                     set_status(ocode, 9, 9, step3, step4, 9, 9)
                     http_util.send_notification(step2status["id"], config.service_code, str(otable), "Arrived", config.server_id)
+                    if not mq_flag[7]:
+                        mq_util.send(config.server_id, {
+                            "orderSeq": seq,
+                            "tableNo": otable,
+                            "menu": omenu,
+                            "robotType": step2status["stype"],
+                            "robotId": step2status["id"],
+                            "status": "complete_delivery"
+                        })
+                        mq_flag[7] = True
                     print("End step2")
                 else:
                     print("Ing step2")
@@ -262,11 +378,31 @@ while True:
                 print("step3 :: ", omenu)
                 dyc_con.order(omenu)
                 set_status(ocode, 1, step2, step3, step4, 1, 1)
+                if not mq_flag[0]:
+                    mq_util.send(config.server_id, {
+                        "orderSeq": seq,
+                        "tableNo": otable,
+                        "menu": omenu,
+                        "robotType": step3status["stype"],
+                        "robotId": step3status["id"],
+                        "status": "make_menu"
+                    })
+                    mq_flag[0] = True
 
             if(step1 == 1 and run_time > 40):
                 #dyc_con.order(omenu)
                 print("end step1")
                 set_status(ocode, 9, step2, step3, step4, 9, 9)
+                if not mq_flag[1]:
+                    mq_util.send(config.server_id, {
+                        "orderSeq": seq,
+                        "tableNo": otable,
+                        "menu": omenu,
+                        "robotType": step3status["stype"],
+                        "robotId": step3status["id"],
+                        "status": "operation_complete"
+                    })
+                    mq_flag[1] = True
 
         if(step1 > 0):
             run_time = run_time + 1

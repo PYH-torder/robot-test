@@ -16,9 +16,9 @@ def send(quename, json):
     channel.queue_declare(queue=quename)
 
     channel.basic_publish(
-        exchange=''             # 다른 Queue로 Routing하는 역할
+        exchange=''               # 다른 Queue로 Routing하는 역할
         , routing_key=quename     # Message를 적재할 Queue
         , body=str(json)          # 전송할 Message
     )
-
+    print('mq_util.send :', str(json))
     connection.close()
