@@ -8,6 +8,7 @@ import config
 from dao import device_dao
 from dao import order_dao
 from dao import store_dao
+from robot_controller import lgs_con
 from util import http_util
 
 connection = pika.BlockingConnection(pika.ConnectionParameters(
@@ -41,8 +42,8 @@ def callback(ch, method, properties, body):
             if(data["ty"] == "order"):
                 order_dao.save_order(data["storeid"], data["ssid"], data["otype"], data["ocode"], data["omenu"], data["oname"], data["oqty"], data["otable"])
             
-            if(data["ty"] == ""):
-                pass
+            if(data["ty"] == "complete"):
+                lgs_con.go_return(data["deviceid"])
 
             sys.stdout.flush()
 
