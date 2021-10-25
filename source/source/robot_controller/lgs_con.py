@@ -32,7 +32,7 @@ def get_poi():
 
     rtn = requests.get(url, headers=oheaders)
     res = rtn.json()
-    
+    #print("get_poi!!", res)
     if(str(res["resultCode"]) == "0114"):
         refresh_token()
         return get_poi()
@@ -47,7 +47,6 @@ def get_poi():
     rtn2 = requests.get(url2)
     resdata = rtn2.json()
     mappoi = resdata["customPointData"]
-
 
 def refresh_token():
     global headers, token, userid
@@ -65,6 +64,8 @@ def refresh_token():
     res2 = rtn2.json()
     token = res2["result"]["authToken"]
 
+refresh_token()
+get_poi()
 
 def go_cancel(robotid):
     global headers, token, userid
@@ -269,12 +270,14 @@ def delivery(table, robotid):
         print("get poi")
 
     callpoi = ""
-    
+    #print("delivery mappoi", mappoi)
     for poi in mappoi:
+        if len(table) == 1 :
+            table = "0" + table
         if(mappoi[poi]["name"]["kr"] == table):
             callpoi = mappoi[poi]["cpId"]
             break
-    
+    print("callpoi!!", callpoi)
     if(callpoi != ""):
         url = host + "/robot/b2b/v1.1/device/"+ robotid +"/control"
         
@@ -295,6 +298,7 @@ def delivery(table, robotid):
 
         if(str(res["resultCode"]) == "0114"):
             refresh_token()
+            print("lgs delivery!!", table, robotid)
             return delivery(table, robotid)
         elif(str(res["resultCode"]) != "0000"):
             rtnvalue["code"] = 600

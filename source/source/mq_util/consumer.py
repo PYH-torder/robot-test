@@ -5,6 +5,7 @@ sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 import pika
 import json
 import config
+import time
 from dao import device_dao
 from dao import order_dao
 from dao import store_dao
@@ -20,7 +21,7 @@ connection = pika.BlockingConnection(pika.ConnectionParameters(
 channel = connection.channel()
 
 def callback(ch, method, properties, body):
-    print(" [x] Received %r" % body)
+    print(time.strftime('%Y-%m-%d %H:%M:%S'), " [x] Received %r" % body)
 
     if str(body) != None and str(body) != "":
         data = json.loads(body)

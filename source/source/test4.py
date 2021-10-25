@@ -1,15 +1,12 @@
-import asyncio
-import websockets
+import requests
+import config
+from robot_controller import vd_con
 
-async def hello():
-    uri = "ws://127.0.0.1:4587"
-    async with websockets.connect(uri) as websocket:
-        name = input("What's your name? ")
+#print(vd_con.status('9686649074951', 'c0847d1894e6'))
 
-        await websocket.send(name)
-        print(f"> {name}")
-
-        greeting = await websocket.recv()
-        print(f"< {greeting}")
-
-asyncio.get_event_loop().run_until_complete(hello())
+res = requests.post(config.vds_host + "/robot/action", json={
+                    "deviceId" : '9686649074951',
+                    "robotId" : 'c0847d1894e6',
+                    "action" : "Complete"
+                })
+print(res)
